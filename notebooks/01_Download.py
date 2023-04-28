@@ -14,10 +14,20 @@ warnings.filterwarnings("ignore")
 hdfs_directory = 'hdfs://hadoop-vm.internal.cloudapp.net:9000/twitter'
 
 year = 2020
-month_from = int(sys.argv[1])
-month_to = int(sys.argv[2])
-compress_type = sys.argv[3]
-spacer = sys.argv[4]
+if(len(sys.argv) < 7):
+    month_from = int(sys.argv[1])
+    month_to = int(sys.argv[2])
+    compress_type = sys.argv[3]
+    spacer = sys.argv[4]
+    outputDir = sys.argv[5]
+else:
+    year = int(sys.argv[1])
+    month_from = int(sys.argv[2])
+    month_to = int(sys.argv[3])
+    compress_type = sys.argv[4]
+    spacer = sys.argv[5]
+    outputDir = sys.argv[6]
+    
 
 # In[4]:
 keywords = ['COVID-19', 'Coronavirus', 'Pandemic', 'Vaccine', 'Vaccination', 'Immunization', 'COVID vaccine', 'Vaccine rollout', 'Vaccine hesitancy', 'Vaccine mandate', 'Booster shot', 'Vaccine passport', 'Vaccination rate', 'Public health', 'WHO', 'CDC']
@@ -52,7 +62,8 @@ def get_all_files(directory):
 # In[6]:
 
 # change directory to dowload folder
-output_directory = "data"
+output_directory = "/home/rmsryu/notebooks/CA2/ca2-twitter/notebooks/data"
+output_directory_01 = "/home/rmsryu/notebooks/CA2/ca2-twitter/notebooks/data-01"
 os.chdir(output_directory)
 
 
@@ -61,9 +72,23 @@ os.chdir(output_directory)
 
 def download_twitter_data(year, month, day, compress_type = "tar", spacer = "-"):
     filename = f"twitter{spacer}stream{spacer}{year}{spacer}{str(month).zfill(2)}{spacer}{str(day).zfill(2)}.{compress_type}"
+    
+    # Check file in both disk
+    os.chdir(output_directory)
     if os.path.exists(filename):
         print(f"Downloaded: {filename}")
         return filename
+    
+    os.chdir(output_directory_01)
+    if os.path.exists(filename):
+        print(f"Downloaded: {filename}")
+        return filename
+    
+    
+    if(outputDir == "data"):
+        os.chdir(output_directory)
+    else:
+        os.chdir(output_directory_01)
     
     url = f"https://archive.org/download/archiveteam-twitter-stream-{year}-{str(month).zfill(2)}/{filename}"
     response = requests.get(url, stream=True)
@@ -78,8 +103,6 @@ def download_twitter_data(year, month, day, compress_type = "tar", spacer = "-")
         print(f"Failed to download: {url}")
 
 
-# Download only
-year = 2020
 for month in range(month_from, month_to):
     for day in range(1, 32):
         try:
