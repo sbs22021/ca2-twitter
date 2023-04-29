@@ -2,6 +2,7 @@
 # coding: utf-8
 
 # In[1]:
+import logging
 import sys
 import os
 import requests
