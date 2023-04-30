@@ -4,6 +4,7 @@
 # In[1]:
 import warnings
 import logging
+import sys
 import os
 import requests
 import zipfile
@@ -13,6 +14,9 @@ import json
 import shutil
 from datetime import datetime
 from hdfs import InsecureClient
+
+# Get JobId
+jobId = int(sys.argv[1])
 
 # INIT VARIABLES
 warnings.filterwarnings("ignore")
@@ -74,8 +78,12 @@ def LOG_INFO(message):
     print(message)
 
 # Extract files
-output_dir = "data-01/output"
-tweets_dir = "data-01/tweets"
+LOG_INFO(f"Starting {jobId}")
+output_dir = f"data-01/output/job-{jobId}"
+LOG_INFO(f"output_dir: {output_dir}")
+
+tweets_dir = f"data-01/tweets/job-{jobId}"
+LOG_INFO(f"tweets_dir: {tweets_dir}")
 
 # Prepare output folders
 create_folder(tweets_dir)
@@ -96,61 +104,136 @@ processed_files = ["data/twitter_stream_2020_01_01.tar",
         "data/twitter_stream_2020_01_10.tar",
         "data/twitter_stream_2020_01_11.tar",
         "data/twitter_stream_2020_01_12.tar",
-        "data/twitter_stream_2020_01_13.tar"]
+        "data/twitter_stream_2020_01_13.tar",
+        "data/twitter_stream_2020_01_15.tar",
+        "data/twitter_stream_2020_03_01.tar",
+        "data/twitter_stream_2020_05_01.tar",
+        "data/twitter_stream_2020_01_16.tar",
+        "data/twitter_stream_2020_03_02.tar",
+        "data/twitter_stream_2020_01_17.tar",
+        "data/twitter_stream_2020_03_03.tar",
+        "data/twitter-stream-2020-07-01.zip",
+        "data/twitter_stream_2020_01_18.tar",
+        "data/twitter_stream_2020_03_04.tar",
+        "data/twitter-stream-2020-07-02.zip",
+        "data/twitter-stream-2020-07-03.zip",
+        "data/twitter-stream-2020-07-04.zip",
+        "data/twitter-stream-2020-07-06.zip",
+        "data/twitter-stream-2020-07-07.zip",
+        "data/twitter_stream_2020_01_19.tar",
+        "data/twitter_stream_2020_03_05.tar",
+        "data/twitter-stream-2020-07-08.zip",
+        "data/twitter_stream_2020_01_20.tar",
+        "data/twitter_stream_2020_03_06.tar",
+        "data/twitter-stream-2020-07-09.zip",
+        "data/twitter_stream_2020_01_03.tar",
+        "data/twitter_stream_2020_05_02.tar",
+        "data/twitter_stream_2020_05_03.tar",
+        "data/twitter_stream_2020_01_21.tar",
+        "data/twitter_stream_2020_03_07.tar",
+        "data/twitter-stream-2020-07-10.zip",
+        "data/twitter_stream_2020_01_22.tar",
+        "data/twitter-stream-2020-07-11.zip",
+        "data/twitter_stream_2020_03_08.tar",
+        "data/twitter_stream_2020_01_23.tar",
+        "data/twitter_stream_2020_03_09.tar",
+        "data/twitter-stream-2020-07-12.zip",
+        "data/twitter_stream_2020_01_24.tar",
+        "data/twitter_stream_2020_05_04.tar",
+        "data/twitter_stream_2020_03_10.tar",
+        "data/twitter_stream_2020_05_05.tar",
+        "data/twitter_stream_2020_01_25.tar",
+        "data/twitter-stream-2020-07-13.zip",
+        "data/twitter_stream_2020_03_11.tar",
+        "data/twitter_stream_2020_01_26.tar",
+        "data/twitter-stream-2020-07-14.zip",
+        "data/twitter_stream_2020_03_12.tar",
+        "data/twitter_stream_2020_01_27.tar",
+        "data/twitter_stream_2020_05_06.tar",
+        "data/twitter-stream-2020-07-15.zip",
+        "data/twitter_stream_2020_03_13.tar",
+        "data/twitter_stream_2020_01_28.tar",
+        "data/twitter-stream-2020-07-16.zip",
+        "data/twitter_stream_2020_03_14.tar",
+        "data/twitter-stream-2020-07-17.zip",
+        "data/twitter_stream_2020_01_29.tar",
+        "data/twitter-stream-2020-07-18.zip",
+        "data/twitter_stream_2020_03_15.tar",
+        "data/twitter_stream_2020_05_07.tar",
+        "data/twitter_stream_2020_01_30.tar",
+        "data/twitter-stream-2020-07-19.zip",
+        "data/twitter_stream_2020_01_31.tar",
+        "data/twitter_stream_2020_03_17.tar",
+        "data/twitter-stream-2020-07-20.zip",
+        "data/twitter-stream-2020-07-21.zip",
+        "data/twitter_stream_2020_03_18.tar",
+        "data/twitter-stream-2020-07-22.zip"
+]
 
+
+# 2 jobs in pararallel
+data_folder="data"
+if(jobId == 1):
+    data_folder="data-01"
+
+# cout files
 idx = 0
-for data_folder in ["data","data-01"]:
-    for file in get_all_files(data_folder):
-        if("twitter" in file):
-            
-            # skip files processed
-            if((file in processed_files) or (file in error_files)):
-                logging.debug(f"Skipping file {file}")
-                continue
-                
-            create_folder(output_dir)
-            
-            # Extract file
-            try:
-                LOG_INFO(f"Extracting {file}")
-                if("zip" in file):
-                    extract_zip_file(file, output_dir)
-                else:
-                    extract_tar_file(file, output_dir)
-            except Exception as err:
-                logging.exception('Exception: {0}'.format(err))
-                continue
-            
-            
-            LOG_INFO(f"Processing extracted files")
-            idx+=1
-            output_file = f"{tweets_dir}/covid-tweets-{date_time}-{idx}.json"
-            # Open final file to save tweets on zip
-            with open(output_file, 'x') as f_out:               
-                for file in get_all_files(output_dir, recursive=True):
-                    if file.endswith('.bz2'):
+for file in get_all_files(data_folder):
+    if("twitter" in file):
+
+        # skip files processed
+        if((file in processed_files) or (file in error_files)):
+            logging.debug(f"Skipping file {file}")
+            continue
+
+        create_folder(output_dir)
+
+        # Extract file
+        try:
+            LOG_INFO(f"Extracting {file}")
+            if("zip" in file):
+                extract_zip_file(file, output_dir)
+            else:
+                extract_tar_file(file, output_dir)
+        except Exception as err:
+            logging.exception('Exception: {0}'.format(err))
+            continue
+
+
+        LOG_INFO(f"Processing extracted files")
+        idx+=1
+        output_file = f"{tweets_dir}/covid-tweets-{date_time}-{idx}.json"
+        # Open final file to save tweets on zip
+        with open(output_file, 'x') as f_out:               
+            for file in get_all_files(output_dir, recursive=True):
+                if file.endswith('.bz2'):
+                    try:
                         extracted_file_path = extract_bz2_file(file, tweets_dir)
-                        # Read the file
-                        with open(extracted_file_path, 'r') as f_in:
-                            for line in f_in:
-                                tweet = json.loads(line)
-                                # Check if tweet contains a keyword or hashtag
-                                try:
-                                    # Get full tweet text when posible
-                                    t_text = tweet['text']
-                                    try:
-                                        t_text = tweet['extended_tweet']['full_text']
-                                    except:
-                                        pass
-                                    
-                                    if any(keyword in t_text for keyword in unique_keywords) or any(hashtag in t_text for hashtag in unique_hashtags):
-                                        json.dump(tweet, f_out)
-                                        f_out.write('\n')
-                                except Exception as err:
-                                    pass
-                        # remove extracted file
-                        os.remove(extracted_file_path)
-            # clean up output
-            shutil.rmtree(output_dir)      
+                    except Exception as err:
+                        LOG_INFO(f"Fail during extract_bz2_file: {file}")
+                        logging.exception('Exception: {0}'.format(err))
+                        continue
+                    # Read the file
+                    with open(extracted_file_path, 'r') as f_in:
+                        for line in f_in:
+                            tweet = json.loads(line)
+                            # Check if tweet contains a keyword or hashtag
+                            try:
+                                # Get full tweet text when posible
+                                t_text = tweet['text']
+                                # Check if extended text
+                                extended_tweet = tweet.get('extended_tweet')
+                                if extended_tweet:
+                                    t_text = extended_tweet.get('full_text')
+
+                                if any(keyword in t_text for keyword in unique_keywords) or any(hashtag in t_text for hashtag in unique_hashtags):
+                                    json.dump(tweet, f_out)
+                                    f_out.write('\n')
+                            except Exception as err:
+                                pass
+                    # remove extracted file
+                    os.remove(extracted_file_path)
+        # clean up output
+        shutil.rmtree(output_dir)      
             
 
