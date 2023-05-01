@@ -68,5 +68,11 @@ sudo systemctl stop mongod
 ```
 
 
+## 7. Install mongo spark connector 3.0.1
+
+https://www.mongodb.com/docs/spark-connector/current/
+https://spark-packages.org/package/mongodb/mongo-spark
+https://repo1.maven.org/maven2/org/mongodb/spark/mongo-spark-connector_2.12/3.0.1/mongo-spark-connector_2.12-3.0.1.jar
+
 
 
