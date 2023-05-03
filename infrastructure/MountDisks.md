@@ -42,7 +42,7 @@ sudo mount /dev/sdc1 /usr/mongodata/db
 
 Find UUID of the disk `sudo blkid`
 
-Edit file (example)
+Edit file /etc/fstab
 ```sh
 # CLOUD_IMG: This file was created/modified by the Cloud Image build process
 UUID=1b1cdf6d-bd03-4f70-b3c3-d604b91cbb66       /        ext4   discard,errors=remount-ro       0 1
