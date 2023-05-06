@@ -1,6 +1,7 @@
 # custom folders
 data/
 data-01/
+literature/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
